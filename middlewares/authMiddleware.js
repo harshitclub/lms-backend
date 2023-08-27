@@ -1,6 +1,6 @@
 const User = require("../models/userSchema");
-const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
+const { verifyJwtToken } = require("../config/verifyJwtToken");
 
 /--------------------------------------------------------------------------/;
 
@@ -14,15 +14,15 @@ const isLogin = asyncHandler(async (req, res, next) => {
 
     if (!token) {
       res.status(404);
-      throw new Error("Token Not Found! Please Login...");
+      throw new Error("Please Login!");
     }
 
     // verify the token
-    const verifiedUserToken = jwt.verify(token, process.env.JWTSECRET);
+    const verifiedUserToken = verifyJwtToken(token);
 
     if (!verifiedUserToken) {
       res.status(401);
-      throw new Error("Unauthorized! Invalid Token...");
+      throw new Error("Unauthorized! Invalid Token");
     }
 
     // get user id from token
@@ -32,48 +32,6 @@ const isLogin = asyncHandler(async (req, res, next) => {
       res.status(404);
       throw new Error("User Not Found...");
     }
-    next();
-  } catch (error) {
-    throw new Error(error);
-  }
-});
-
-/--------------------------------------------------------------------------/;
-
-/*********************
-ADMIN CHECK MIDDLEWARE
-**********************/
-
-const isAdmin = asyncHandler(async (req, res, next) => {
-  try {
-    let token = req.cookies.authToken;
-
-    if (!token) {
-      res.status(404);
-      throw new Error("Token Not Found! Please Login...");
-    }
-
-    // verify the token
-    const verifiedUserToken = jwt.verify(token, process.env.JWTSECRET);
-
-    if (!verifiedUserToken) {
-      res.status(401);
-      throw new Error("Unauthorized! Invalid Token...");
-    }
-
-    // get user id from token
-    const user = await User.findById(verifiedUserToken.id);
-
-    if (!user) {
-      res.status(404);
-      throw new Error("User Not Found...");
-    }
-
-    if (user.role !== "admin") {
-      res.status(401);
-      throw new Error("Unauthorized! Admin Only...");
-    }
-
     next();
   } catch (error) {
     throw new Error(error);
@@ -96,7 +54,7 @@ const isInstructor = asyncHandler(async (req, res, next) => {
     }
 
     // verify the token
-    const verifiedUserToken = jwt.verify(token, process.env.JWTSECRET);
+    const verifiedUserToken = verifyJwtToken(token);
 
     if (!verifiedUserToken) {
       res.status(401);
@@ -124,4 +82,4 @@ const isInstructor = asyncHandler(async (req, res, next) => {
 
 /--------------------------------------------------------------------------/;
 
-module.exports = { isLogin, isAdmin, isInstructor };
+module.exports = { isLogin, isInstructor };

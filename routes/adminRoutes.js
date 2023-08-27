@@ -11,17 +11,37 @@ const {
   createUser,
   getAdminUsers,
 } = require("../controllers/adminControllers");
+const { isAdminAuth } = require("../middlewares/adminMiddlewares/adminAuth");
 const adminRouter = express.Router();
 
+/--------------------------------------------------------------------------/;
+/***********
+POST REQUEST
+************/
 // adminRouter.post("/signup", signupAdmin);
 adminRouter.post("/login", adminLogin);
-adminRouter.get("/:id", getAdmin);
-adminRouter.put("/update-profile/:id", updateProfile);
-adminRouter.put("/block/:id", blockUser);
-adminRouter.put("/unblock/:id", unBlockUser);
-adminRouter.put("/change-password/:id", changePassword);
-adminRouter.delete("/delete-profile/:id", deleteAdminUser);
-adminRouter.post("/create-user", createUser);
-adminRouter.get("/get-users/:id", getAdminUsers);
+adminRouter.post("/create-user", isAdminAuth, createUser);
+
+/--------------------------------------------------------------------------/;
+/**********
+GET REQUEST
+***********/
+adminRouter.get("/:id", isAdminAuth, getAdmin);
+adminRouter.get("/get-users/:id", isAdminAuth, getAdminUsers);
+
+/--------------------------------------------------------------------------/;
+/**********
+PUT REQUEST
+***********/
+adminRouter.put("/update-profile/:id", isAdminAuth, updateProfile);
+adminRouter.put("/block/:id", isAdminAuth, blockUser);
+adminRouter.put("/unblock/:id", isAdminAuth, unBlockUser);
+adminRouter.put("/change-password/:id", isAdminAuth, changePassword);
+
+/--------------------------------------------------------------------------/;
+/*************
+DELETE REQUEST
+**************/
+adminRouter.delete("/delete-profile/:id", isAdminAuth, deleteAdminUser);
 
 module.exports = adminRouter;
